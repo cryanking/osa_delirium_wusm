@@ -1,0 +1,12 @@
+PKG_CXXFLAGS = -fopenmp -I"./BARTfiles" 
+PKG_LIBS = -fopenmp
+
+
+# Added commands
+
+SOURCES = $(wildcard BARTfiles/*.cpp)
+OBJECTS = cauchy_funs.o clbart_bcf.o cpbart_bcf.o cwbart_bcf.o init.o $(SOURCES:.cpp=.o)
+
+#stripUnneeded: $(SHLIB)
+#	if [[ -e "/usr/bin/strip" && -e "/bin/uname" && `uname` == "Linux" ]] ; then /usr/bin/strip --strip-unneeded -K R_registerRoutines -K R_useDynamicSymbols $(SHLIB); fi
+#	

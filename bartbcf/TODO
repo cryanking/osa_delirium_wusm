@@ -1,0 +1,8 @@
+TODO
+* transform imported data from Hill into functional vignette / unit test
+* write R wrapper for combined propensity score model fitting
+* write R wrapper for double matching
+* Add ATE / ATT / LATE type relative risk estimates to binary
+* clean up the vignette / simulations
+* combine sbart-type imputation
+

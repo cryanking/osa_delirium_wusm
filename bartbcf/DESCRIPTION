@@ -1,0 +1,18 @@
+Package: bartbcf
+Title: Causal inference using BART and propensity scoring
+Version: 0.0.0.9000
+Authors@R: person("Christopher", "King", email = "christopherking@wustl.edu", role = c("aut", "cre"))
+Description: Nonparametric and machine learning methods for high-dimensional adjustment and propensity score estimation induce bias if naively implemented. bcf implements the methods of Hahn 2017. Se the backage bcf for their reference implentation. This modification to the BART package was developed for an applied project while bcf was under development. We do not intend to maintain it.
+Depends: R (>= 3.5.0)
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.3), parallel, tools, HDInterval, BART
+LinkingTo: Rcpp
+Suggests: knitr, rmarkdown, sbart, MASS
+VignetteBuilder: knitr
+SystemRequirements: C++11
+NeedsCompilation: yess
+Maintainer: C Ryan King <christopherking@wustl.edu>
+RoxygenNote: 6.0.1
+KeepSource: TRUE
