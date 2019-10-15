@@ -126,7 +126,7 @@ print(mean(bart_prop_basic, na.rm=TRUE))
 
 sink(NULL)
 
-save(file="bart_com_results_single.Rdata", bart_prop_basic,  bart_dr, bart_prop, osa_model)
+save(file="bart_com_results_single.Rdata", bart_prop_basic,  bart_dr, bart_prop)
 
 if(file.exists("email.cred")) {
 load(file="email.cred")   

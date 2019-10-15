@@ -12,7 +12,7 @@ num_imputations <- 30
 beta <- .01
 ci_frac <- 1-beta
 
-registerDoParallel(cores=6)
+registerDoParallel(cores=5)
 sink("osa_results/bcf_multiple_combined_results.txt")
 sink(NULL)
 
@@ -25,7 +25,7 @@ set.seed(202)
 
 bart_draws   <- 300L
 bart_burn    <- 5000L
-keep_every   <- 100L
+keep_every   <- 50L
 
 bart_prop <- foreach( impute_index = seq(num_imputations), .combine='cbind', .inorder=FALSE, .packages=c('bartbcf', 'BART', 'magrittr', 'dplyr')) %dopar% {
   load(file=paste0("./imputation_folders/combined_pop/", impute_index, "/imputed_with_propensity.Rdata"))
@@ -39,7 +39,7 @@ local.outcomes <- local.imputed$ever_del
   num_treated <- sum(local.imputed$new_osa)
   temp.data <- as.data.frame(local.imputed[,c("Total.",'predicted_osa')])
 
-  bcf_osa_unadj <- pbart_bcf(x.train=temp.data,   y.train=local.outcomes,  numtreated = num_treated , printevery=5000L, ndpost=bart_draws, nskip=bart_burn, use_cauchy=FALSE, rm.const=FALSE, ntree=ntree_best, ntree_treated=ntree_best/5, k=k_best, ci_frac=ci_frac, nkeeptreedraws=1)
+  bcf_osa_unadj <- pbart_bcf(x.train=temp.data,   y.train=local.outcomes,  numtreated = num_treated , printevery=5000L, ndpost=bart_draws, nskip=bart_burn, use_cauchy=FALSE, rm.const=FALSE, ntree=ntree_best, ntree_treated=ntree_best/5, k=k_best, ci_frac=ci_frac, nkeeptreedraws=1, keepevery=keep_every)
   rbind(bcf_osa_unadj$ate_vector, bcf_osa_unadj$att_vector)
 
 }
@@ -77,9 +77,9 @@ bart_dr <- foreach( impute_index = seq(num_imputations), .combine='cbind', .inor
 
   num_treated <- sum(local.imputed$new_osa)
   local.outcomes <- local.imputed$ever_del
-  temp.data <- irmi_imputed %>% select(-one_of(c('PatientID', 'cpap_compliance', 'linear_propensity',  "Neck", 'is_icu','Age_missing','predicted_cpap','new_osa', 'ever_del')))  %>% select( -starts_with("StopBang"))  %>% as.data.frame
+  temp.data <- local.imputed %>% select(-one_of(c('PatientID', 'cpap_compliance', 'linear_propensity',  "Neck", 'is_icu','Age_missing','predicted_cpap','new_osa', 'ever_del')))  %>% select( -starts_with("StopBang"))  %>% as.data.frame
 
-  bcf_osa_unadj <- pbart_bcf(x.train=temp.data,   y.train=local.outcomes,  numtreated = num_treated , printevery=50000L, ndpost=bart_draws, nskip=bart_burn, rm.const=TRUE, ntree=ntree_best, ntree_treated=ceiling(ntree_best/5), k=k_best, ci_frac=ci_frac, nkeeptreedraws=1)
+  bcf_osa_unadj <- pbart_bcf(x.train=temp.data,   y.train=local.outcomes,  numtreated = num_treated , printevery=50000L, ndpost=bart_draws, nskip=bart_burn, rm.const=TRUE, ntree=ntree_best, ntree_treated=ceiling(ntree_best/5), k=k_best, ci_frac=ci_frac, nkeeptreedraws=1, keepevery=keep_every)
   rbind(bcf_osa_unadj$ate_vector, bcf_osa_unadj$att_vector)
 
 }
@@ -114,7 +114,7 @@ bart_prop_basic <- foreach( impute_index = seq(num_imputations), .combine='c', .
 
   num_treated <- sum(local.imputed$new_osa)
   local.outcomes <- local.imputed$ever_del
-  temp.data <- irmi_imputed %>% select(-one_of(c('PatientID', 'cpap_compliance', 'linear_propensity',  "Neck", 'is_icu','Age_missing','predicted_cpap', 'ever_del')))  %>% select( -starts_with("StopBang"))  %>% as.data.frame
+  temp.data <- local.imputed %>% select(-one_of(c('PatientID', 'cpap_compliance', 'linear_propensity',  "Neck", 'is_icu','Age_missing','predicted_cpap', 'ever_del')))  %>% select( -starts_with("StopBang"))  %>% as.data.frame
 
 
   osa_propensity_adjusted<-pbart( y.train = local.outcomes  , x.train = temp.data , nskip = bart_burn, ndpost=bart_draws , keepevery=keep_every   , sparse=FALSE, printevery=50000L, rm.const=TRUE, ntree=ntree_best,  k=k_best, nkeeptrain=1)

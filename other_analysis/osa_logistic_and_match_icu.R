@@ -327,3 +327,94 @@ print( c( matched_bart_att, sqrt(total_var) , matched_bart_att_ci))
 sink(NULL)
  
  
+###############
+## linear adjustment model for stopbang
+###############
+print("linear adjustment for stopbang")
+
+
+linear_ame_holder <- foreach( impute_index = seq(num_imputations), .combine='rbind', .inorder=FALSE, .packages=c('margins', 'magrittr', 'dplyr', 'brglm2', 'forcats' )) %dopar% {
+  print(impute_index)
+  load(file=paste0("./imputation_folders/icu_pop/", impute_index, "/imputed_baseline_cov.Rdata"))
+
+  local.imputed  %<>% filter(OSA < .1 ) %>% filter(!pdel) %>% filter(!is.na( StopBang_Total) )
+  
+ local.imputed %<>% mutate(  Surg_Type=fct_lump_min(Surg_Type, min=100, other_level='OTHER'),ASA = as.factor(ASA) )
+
+local.imputed %<>%  mutate(Surg_Type = fct_infreq(Surg_Type) , RACE=fct_infreq(RACE) )
+
+local.imputed %<>% mutate_at( which(sapply(local.imputed , is.logical)), as.integer)
+
+temp <- local.imputed$StopBang_Total
+
+local.imputed  %<>% select(-one_of("ed_college", "white_percent")) %>% select( -starts_with("StopBang")) %>% select(-one_of("OSA", "CPAP_Usage", "neval_valid", 'disposition', "Neck", 'cpap_compliance', 'new_osa')) 
+
+local.imputed$StopBang_Total <- temp
+
+  drop_dx <- local.imputed %>% select(starts_with("ccs_factor")) %>% colSums(.) %>% `<`(., 20) %>% which(  ) %>% names(.)
+  
+  local.imputed$ccs_factor_0 <- local.imputed$ccs_factor_0 + rowSums(local.imputed[,drop_dx] )
+  local.imputed %<>% select( - one_of(drop_dx))
+
+  
+  tempf <- formula(paste0( "ever_del ~ " , paste(setdiff(colnames(local.imputed), c('PatientID','predicted_cpap','is_icu', 'ever_assessed',   'linear_propensity', 'predicted_osa', "OSA", 'ever_del', 'WEIGHT', 'CCI', 'before_screening','new_osa', "CPAP_Usage", "pdel", "neval_valid") ), collapse='+') ) )
+  osa_glm <- glm( tempf, family=binomial(), data=local.imputed, method=brglmFit)
+## TODO: see how this variables argument works with factor levels
+  osa_margins <- margins(osa_glm, variables="StopBang_Total")
+   unlist(summary(osa_margins)[,c('AME', 'SE')])
+}
+
+total_var <- var(linear_ame_holder[,1]) * (1 + 1/nrow(linear_ame_holder)) + mean(linear_ame_holder[,2]^2)
+
+## point estimate
+matched_bart_att <- mean(linear_ame_holder[,1])
+matched_bart_att_ci <- matched_bart_att + c(1,-1)*qnorm(beta/2)*sqrt(total_var)
+
+sink('osa_results/propensity_icu_match_models.txt', append=TRUE)
+print(paste0('linear model stopbang ame at ', beta))
+print( c( matched_bart_att, sqrt(total_var) , matched_bart_att_ci))
+sink(NULL)
+
+
+ 
+linear_ame_holder <- foreach( impute_index = seq(num_imputations), .combine='rbind', .inorder=FALSE, .packages=c( 'magrittr', 'dplyr', 'brglm2', 'forcats' )) %dopar% {
+  print(impute_index)
+  load(file=paste0("./imputation_folders/icu_pop/", impute_index, "/imputed_baseline_cov.Rdata"))
+
+  local.imputed  %<>% filter(OSA < .1 ) %>% filter(!pdel) %>% filter(!is.na( StopBang_Total) )
+  
+ local.imputed %<>% mutate(  Surg_Type=fct_lump_min(Surg_Type, min=100, other_level='OTHER'),ASA = as.factor(ASA) )
+
+local.imputed %<>%  mutate(Surg_Type = fct_infreq(Surg_Type) , RACE=fct_infreq(RACE) )
+
+local.imputed %<>% mutate_at( which(sapply(local.imputed , is.logical)), as.integer)
+
+temp <- local.imputed$StopBang_Total
+
+local.imputed  %<>% select(-one_of("ed_college", "white_percent")) %>% select( -starts_with("StopBang")) %>% select(-one_of("OSA", "CPAP_Usage", "neval_valid", 'disposition', "Neck", 'cpap_compliance', 'new_osa')) 
+
+local.imputed$StopBang_Total <- temp
+
+  drop_dx <- local.imputed %>% select(starts_with("ccs_factor")) %>% colSums(.) %>% `<`(., 20) %>% which(  ) %>% names(.)
+  
+  local.imputed$ccs_factor_0 <- local.imputed$ccs_factor_0 + rowSums(local.imputed[,drop_dx] )
+  local.imputed %<>% select( - one_of(drop_dx))
+
+  
+  tempf <- formula(paste0( "ever_del ~ " , paste(setdiff(colnames(local.imputed), c('PatientID','predicted_cpap','is_icu', 'ever_assessed',   'linear_propensity', 'predicted_osa', "OSA", 'ever_del', 'WEIGHT', 'CCI', 'before_screening','new_osa', "CPAP_Usage", "pdel", "neval_valid") ), collapse='+') ) )
+  osa_glm <- glm( tempf, family=binomial(), data=local.imputed, method=brglmFit)
+## TODO: see how this variables argument works with factor levels
+   unlist(summary(osa_glm)$coef["StopBang_Total",1:2])
+}
+
+total_var <- var(linear_ame_holder[,1]) * (1 + 1/nrow(linear_ame_holder)) + mean(linear_ame_holder[,2]^2)
+
+## point estimate
+matched_bart_att <- mean(linear_ame_holder[,1])
+matched_bart_att_ci <- matched_bart_att + c(1,-1)*qnorm(beta/2)*sqrt(total_var)
+
+sink('osa_results/propensity_icu_match_models.txt', append=TRUE)
+print(paste0('linear model stopbang lor at ', beta))
+print( c( matched_bart_att, sqrt(total_var) , matched_bart_att_ci))
+sink(NULL)
+  

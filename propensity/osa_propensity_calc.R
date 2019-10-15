@@ -8,7 +8,7 @@ library('doParallel')
 
 ################
 
-registerDoParallel(cores=6)
+registerDoParallel(cores=5)
 
 # load(file="osa_data/pre_imputation_preop.Rdata" )
 # load(file="osa_data/imputed_baseline_cov.Rdata")
@@ -28,7 +28,6 @@ bart_prop <- foreach( impute_index = seq(num_imputations) , .combine='c', .inord
 
 # for( impute_index in seq(num_imputations)) {
 load(paste0("./imputation_folders/combined_pop/", impute_index, "/imputed_baseline_cov.Rdata" ) )
-local.imputed %<>% mutate(PatientID = as.character(PatientID))
 
 
 
@@ -46,25 +45,29 @@ local.imputed2 <- local.imputed %>% select(-one_of("ever_del","PatientID","new_o
 
 bart_draws   <- 300
 bart_burn    <- 2500
-keep_every   <- 30
+keep_every   <- 20
 set.seed(202*impute_index)
 
 osa_model <- pbart(y.train=osa_holder, x.train=local.imputed2  
                          , nskip = bart_burn, ndpost=bart_draws , keepevery=keep_every 
                          , sparse=FALSE, printevery=10000L, rm.const=TRUE, k=k_shrink_best_osa, ntree=ntree_best_osa)
 
+local.imputed$predicted_osa <- apply(osa_model$yhat.train, 2, median, na.rm=TRUE)
+
+osa_model$prob.train <- NULL
 save(file=paste0("./imputation_folders/combined_pop/", impute_index, "/propensity_osa.Rdata"), bart_draws, bart_burn, osa_model)
+rm(osa_model)
 
 ## model 3: predict treated CPAP 
 
 
-stop_bang_subsample <- local.imputed2[!is.na(cpap_holder),]
+local.imputed2 <- local.imputed2[!is.na(cpap_holder),]
 
 bart_draws   <- 300
 bart_burn    <- 2500
 keep_every   <- 30
 
-cpap_model <- pbart(y.train=na.omit(cpap_holder), x.train=stop_bang_subsample
+cpap_model <- pbart(y.train=na.omit(cpap_holder), x.train=local.imputed2 
                          , nskip = bart_burn, ndpost=bart_draws, keepevery=keep_every 
                          , sparse=FALSE, printevery=10000L, rm.const=TRUE, k=k_shrink_best_pap, ntree=ntree_best_pap)
 
@@ -72,7 +75,6 @@ cpap_model <- pbart(y.train=na.omit(cpap_holder), x.train=stop_bang_subsample
 
 save(file=paste0("./imputation_folders/combined_pop/", impute_index, "/propensity_cpap.Rdata"),cpap_model, bart_draws, bart_burn )
 
-local.imputed$predicted_osa <- apply(osa_model$yhat.train, 2, median, na.rm=TRUE)
 local.imputed$predicted_cpap[!is.na(local.imputed$cpap_compliance)] <- apply(cpap_model$yhat, 2, median, na.rm=TRUE )
 
 local.imputed$predicted_cpap[is.na(local.imputed$cpap_compliance)] <- mean(local.imputed$predicted_cpap[!is.na(local.imputed$cpap_compliance)])
@@ -81,6 +83,7 @@ local.imputed %<>% filter(!is.na(ever_del)) %>% filter(Anesthesia_Type == "1")
 local.imputed$RACE %<>% fct_collapse( Other = c("Other", "Asian", "Unknown", "Native") )
 local.imputed %<>% select(-one_of("Anesthesia_Type", "disposition"))
 local.imputed$PAP_Type %<>% fct_collapse( OTHER = c("DPAP (holding area)", "DPAP (on ward)", "OTHER") )
+local.imputed %<>% mutate(PatientID = as.character(PatientID))
 
 these.cols <- grep(colnames(local.imputed), pattern="ccs_factor_")
 # these.cols <- c(these.cols, grep(colnames(local.imputed), pattern="before_screen"))
@@ -95,7 +98,7 @@ save_cols <- save_cols[, colSums(save_cols) >= 20]
 local.imputed <- cbind(local.imputed, save_cols)
 
 
-save(file=paste0("./imputation_folders/combined_pop/", impute_index, "/baseline_with_propensity.Rdata"),local.imputed)
+save(file=paste0("./imputation_folders/combined_pop/", impute_index, "/imputed_with_propensity.Rdata"),local.imputed)
                        
 
 

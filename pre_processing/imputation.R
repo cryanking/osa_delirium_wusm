@@ -86,7 +86,7 @@ irmi_imputed <- mice(smaller_preop , maxit=3, m=num_imputations)
 
 
 dir.create("imputation_folders/combined_pop", recursive=TRUE)
-for( impute_index in seq_along(irmi_imputed)) {
+for( impute_index in seq.int(num_imputations) ) {
  this.folder <- paste0( "imputation_folders/combined_pop/",impute_index )
  dir.create( this.folder)
  local.imputed <- complete(irmi_imputed,impute_index)
