@@ -12,14 +12,6 @@
 
   install.packages("bartbcf/", type='source', repo=NULL, clean=TRUE)
 
-  ## TODO: pull benzo rate, total opioid, local anesthetic other than lidocaine
-  ## TODO: consort type flowchart from protocol replaces table 2
-  ## TODO: time of surgery effect? exploratory
-  ## TODO: there are a small number of valid 3 digit procedure codes - will have to test dropping trailing 0s in many, many places.
-  
-  ## additional sensitivity
-  ## TODO: include complete or almost complete (excluding neck) stopbang analysis only
-
   
   ## load all the data from the source files, do some very minimal processing
   source("pre_processing/icu_admission_link.R")

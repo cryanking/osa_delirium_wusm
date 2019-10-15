@@ -22,12 +22,7 @@ colnames(id_links) <- c('PatientID' , 'EMPI', 'VisitIDCode' , 'IDCode', 'DoS', '
   new_outcomes %<>% mutate(VisitIDCode = as.character(VisitIDCode), IDCode = as.character(IDCode ) )
   raw_outcomes <- new_outcomes
 
-  ## match ICU evals to a metavision number ##TODO: wrong and bad with multiple surg
-  ## should match cases to delirium obs not the other way around b/c multiple surgeries in andmission
-  ## alternatively, I should stick to the 'index' surgery
-  ## people can have more than a dozen surgeries - need to match on date window before collapsing!
-  ## these wierd outliers are dressing changes under anesth, repeated washouts etc
-  
+  ## match ICU evals to a metavision number 
 #   table(id_links$VisitIDCode) %>% table(.)
 #       1     2     3     4     5     6     7     8     9    10    11    12    13 
 # 94641  4048   931   320   151    79    42    25    12    15     4     6     3 
