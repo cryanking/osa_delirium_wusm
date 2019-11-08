@@ -217,13 +217,11 @@ ggsave("osa_results/ecdf_propensity.pdf", ml)
 
 if(FALSE) {
 
-## MCMC convergence diagnostics: they are grossly bad
-## on inspection of longer runs, the acf is low (~7%) at 50*75 -> 100k samples = 27 independent obs
-## the effectiveSize ratio based on ar0 is about .07
-## however, the z's from independent chains are also way overdispersed (IQR about 4.6), suggesting that the ar0 tends to underestimate the variance of the sample estimates(overestimate the neff or underestimate the marginal variance)
-## ar0 based estimates are known to behave badly in many cases
-## it is the case that single-sample probs will mix much more slowly than composites from the entire sample; they often will have only a few variables that can change and f(x_i) doesn't have the clt over sample effect with at most 1 tree changing per sample
-## it's a little strange that the 
+## MCMC convergence diagnostics: improved with subsequent parameter tuning, additional length, number of chains
+## The smaller icu-only set for propensity calculation mixes faster anyway - it is more able to take large steps with the default parameters
+## had been inspecting single-sample probs that will mix much more slowly than composites from the entire sample; they often will have only a few variables that can change and f(x_i) doesn't have the clt over sample effect with at most 1 tree changing per sample
+## given that uncertainty of propensity isn't being propogated, don't need large effectiveSize anyway, ~ 100 to get the mean is fine.
+
 pdf()
     i <- floor(seq(1, 10000, length.out=50))
     auto.corr <- acf(osa_model$yhat.train[seq(nrow(osa_model$yhat.train)/3) , i], plot=FALSE, lag.max=100)
@@ -235,9 +233,7 @@ pdf()
     these_acf[h,] <- auto.corr$acf[, h, h]
     }
     
-    ## the acf function is noticing a legit slow start in eg case 1225 - is it related to how low the baseline prob is? if i start it after iter 2000 it's normal, so maybe it's just a burn-in thing. need to take a look if it's ALWAYS a beginning thing and if it's similar in the different chains.
-    ## other low values don't necessarily do that
-    ## mayble also it's a function of the sparse options and lowish N trees -> no relevant variables changing (it does have a long slow curve) 
+    ## do appear to need ~ 2000 burn in
     tacf <- acf(osa_model$yhat.train[seq(from=2000, to=nrow(osa_model$yhat.train)/3) , i[7] , drop=FALSE])
     
     j <- seq(-0.5, 0.4, length.out=10)
@@ -286,9 +282,6 @@ mean(abs(geweke$z) > qnorm(.99))
 mean(abs(geweke$z) > qnorm(.999)) 
 
 dev.off()
-
-
-## something similar for cpap
 
 
 }

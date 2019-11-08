@@ -20,9 +20,9 @@ load("propensity_pap_tuning.Rdata")
 k_shrink_best_pap <- k_shrink_best
 ntree_best_pap <- ntree_best
 
-## because rsi and the ccs categories are (approximately) colinear (rsi = deterministic function of ccs), exclude rsi from most of these calcs. I had used rsi in the past and had similar results
+## because rsi and the ccs categories are (approximately) colinear (rsi = deterministic function of ccs), exclude rsi from most of these calcs. using rsi gives similar results but takes longer
 
-num_imputations <- 4
+num_imputations <- 30
 
 bart_prop <- foreach( impute_index = seq(num_imputations) , .combine='c', .inorder=FALSE, .packages=c( 'BART', 'magrittr', 'dplyr')) %dopar% {
 

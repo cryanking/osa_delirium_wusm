@@ -23,7 +23,7 @@ k_shrink_best_pap <- k_shrink_best
 ntree_best_pap <- ntree_best
 
 
-load(file="imputation_folders/icu_pop/1/imputed_baseline_cov.Rdata")
+load(file="imputation_folders/icu_pop/31/imputed_baseline_cov.Rdata")
 
 
 ## note that because bart is tree-based, ordered factor predictors can be turned back into numerics
@@ -88,7 +88,6 @@ save(file="propensity_osa_sparse.Rdata",osa_model, bart_draws, keep_every)
 
 ## model 3: predict treated CPAP 
 
-## this model matrix is rank deficent for the sigest calculation
 stop_bang_subsample <- cbind(cpap_compliance=local.imputed$cpap_compliance, irmi_imputed )  %>%filter(!is.na(cpap_compliance)) 
 
 bart_draws   <- 500000

@@ -149,8 +149,6 @@ id_links %<>% filter(!(PatientID %in% used_ids)) %>% bind_rows(large_outcomes)
   
   
 # table(icu_admits$ICU_Unit)
-# icu_admits %>% filter(VisitIDCode == "110004811270")
-# 5     3727652   704223902 2016-03-22 09:51:00.000 2016-04-25 22:40:00.000  8400 ICU 2016-03-22 09:51:00.000 2016-04-21 19:11:00.000    1 2017-10-24 15:50:50.913  <NA>
 
 # icu_admits %<>% filter(ICU_Unit %in% c("4400 ICU", "5600 ICU", "83 CTICU"))
 

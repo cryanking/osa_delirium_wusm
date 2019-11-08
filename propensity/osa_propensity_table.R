@@ -16,7 +16,7 @@ library("forcats")
 
 
 
-load(file="imputation_folders/icu_pop/1/imputed_baseline_cov.Rdata")
+load(file="imputation_folders/icu_pop/31/imputed_baseline_cov.Rdata")
 
 
 local.imputed %<>% mutate(  Surg_Type=fct_lump_min(Surg_Type, min=100, other_level='OTHER'),ASA = as.factor(ASA) )
@@ -35,8 +35,6 @@ sjlabelled:::set_label(local.imputed$new_osa) <- "OSA+Screen"
 sjlabelled:::set_label(local.imputed$cpap_compliance) <- "PAP_adherence"
 sjlabelled:::set_label(local.imputed$ever_del) <- "Delirium ever"
 
-## TODO double check this
-# local.imputed %<>% mutate(  SMOKING_EVER = fct_explicit_na(as.factor(SMOKING_EVER),"No_Answer" )  )
 
 
 local.imputed2 <- local.imputed %>% select(-starts_with("ccs_factor"))   %>% select( -starts_with("StopBang")) %>% select(-one_of("OSA", "CPAP_Usage", "pdel", "neval_valid", 'disposition', "Neck")) 

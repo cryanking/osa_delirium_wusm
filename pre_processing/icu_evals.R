@@ -7,7 +7,6 @@ options(tibble.width = Inf)
 options(dplyr.print_max = 100)
 
 id_links <- read_excel("osa_data/Cohort_Identifiers.xlsx", col_types=c("text","text","text","text","date","date"), na= c("", "NULL") )
-# colnames(id_links) <- make.names(colnames(id_links) )
 colnames(id_links) <- c('PatientID' , 'EMPI', 'VisitIDCode' , 'IDCode', 'DoS', 'AnestStop')
 
   ## a small number of malformed entries
@@ -22,20 +21,6 @@ colnames(id_links) <- c('PatientID' , 'EMPI', 'VisitIDCode' , 'IDCode', 'DoS', '
   new_outcomes %<>% mutate(VisitIDCode = as.character(VisitIDCode), IDCode = as.character(IDCode ) )
   raw_outcomes <- new_outcomes
 
-  ## match ICU evals to a metavision number 
-#   table(id_links$VisitIDCode) %>% table(.)
-#       1     2     3     4     5     6     7     8     9    10    11    12    13 
-# 94641  4048   931   320   151    79    42    25    12    15     4     6     3 
-#    14    15    16    17    28 
-#     1     1     2     1     1 
-
-
-# temp <- table(id_links$VisitIDCode) 
-# temp[which(temp==14)] #702271058, 701206890 == 28
-
-## silly examples
-# id_links %>% filter(VisitIDCode=='702271058')
-# id_links %>% filter(VisitIDCode=='702177842')
 
 ## how often does it happen that a MRN contains valid and NA PAN? Reasonably so
 
@@ -82,13 +67,5 @@ new_outcomes %<>% mutate(pdel = ifelse( is.na(pdel), FALSE, pdel))
 new_outcomes$MV_ID <- new_outcomes$PatientID
 
 
-# 
-#   new_outcomes$MV_id <- NA
-#   temp <- match(as.character(new_outcomes$VisitIDCode), id_links$VisitIDCode)
-#   new_outcomes$MV_id <- id_links$PatientID[temp]
-#   temp <- match(as.character(new_outcomes$IDCode[is.na(new_outcomes$MV_id )] ), id_links$IDCode)
-#   new_outcomes$MV_id[is.na(new_outcomes$MV_id )] <- id_links$PatientID[temp]
-# 
-#   length(intersect(new_outcomes$MV_id,cpap_form.xl$PatientID))
-#   # [1] 9575
+
   save(file="osa_data/osa_new_outcomes.Rdata", new_outcomes, raw_outcomes)

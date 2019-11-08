@@ -11,13 +11,8 @@ options(tibble.width = Inf)
 options(dplyr.print_max = 100)
 registerDoParallel(cores=5)
 
-## test tuning params for bart with singly imputed data. can't just use the first imputation's results because of the additional noise for mi
 
-## these parameters are chosen to optimize out of sample performance, which is pretty usefuly but probably not the optimal for bias reduction (which is imposible to know)
-
-## revisit to make sure pdels are stored and reaccessable or that local.imputed is sorted in the same was as irmi_imputed so that I can use them later
-
-load(file="imputation_folders/icu_pop/1/imputed_baseline_cov.Rdata")
+load(file="imputation_folders/icu_pop/31/imputed_baseline_cov.Rdata")
 
 
 ## a little pre-transformation 
@@ -75,7 +70,6 @@ auc(predictor=temp$prob.test.mean,   response= osa_holder[-varible_select_osa] )
 
 }
 
-## it makes no difference! the range is 0.851 to 0.856!
 
 bart_draws   <- 50000
 bart_burn    <- 5000
@@ -97,7 +91,7 @@ auc(predictor=temp$prob.test.mean,   response= osa_holder[-varible_select_osa] )
 
 which.max(cpap_model_auc)
 which.max(cpap_model_sparse_auc)
-## note that the sparse variant increases oos auc very slightly - 0.857 vs 0.856 but takes a lot longer, so just do the plain variant
+
 if(FALSE) {
 best_index <- ifelse(max(cpap_model_auc) > max(cpap_model_sparse_auc), which.max(cpap_model_auc), which.max(cpap_model_sparse_auc) )
 dosparse <- max(cpap_model_auc) < max(cpap_model_sparse_auc)

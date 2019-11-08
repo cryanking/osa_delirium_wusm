@@ -9,17 +9,6 @@ library('foreach')
 library('doParallel')
 registerDoParallel(cores=8)
 
-## Approach to margins with multiple imputation
-##  1) compute then pool
-##    -- is a bunch easier to implement
-##    -- dubious normality of AME (although it is based on a delta)
-##    -- could boot AME points then combine all boots -> interval (slower).
-##  2) pool then compute
-##   -- probably less of an issue with nonnormality (coefs vs many intermediated)
-##   -- margins() relies on lm.predict() which pulls the vcov from the qr representation -> can't just modifiy the coefs/vcov stored in an object unless se's aren't created, seems like since it requests / uses a vcov might work!
-
-## note that basically everywhere the ICU restriction /not is accomplished in the imputation step, and then the inner_join timing
-
 
 ## it is slower to do 1 analysis at a time instead of 1 dataset at a time, but much cleaner
 
@@ -310,7 +299,6 @@ local.imputed  %<>% select(-one_of("ed_college", "white_percent")) %>% select( -
 
   tempf <- formula(paste0( "ever_del ~ " , paste(setdiff(colnames(local.imputed), c('PatientID','predicted_cpap','is_icu', 'ever_assessed',   'linear_propensity', 'predicted_osa', "OSA", 'ever_del', 'WEIGHT', 'CCI', 'before_screening','new_osa', "CPAP_Usage", "pdel", "neval_valid") ), collapse='+') ) )
   osa_glm <- glm( tempf, family=binomial(), data=local.imputed, method=brglmFit)
-## TODO: see how this variables argument works with factor levels
   osa_margins <- margins(osa_glm, variables="cpap_compliance")
    unlist(summary(osa_margins)[2,c('AME', 'SE')])
 }
@@ -359,7 +347,6 @@ local.imputed$StopBang_Total <- temp
   
   tempf <- formula(paste0( "ever_del ~ " , paste(setdiff(colnames(local.imputed), c('PatientID','predicted_cpap','is_icu', 'ever_assessed',   'linear_propensity', 'predicted_osa', "OSA", 'ever_del', 'WEIGHT', 'CCI', 'before_screening','new_osa', "CPAP_Usage", "pdel", "neval_valid") ), collapse='+') ) )
   osa_glm <- glm( tempf, family=binomial(), data=local.imputed, method=brglmFit)
-## TODO: see how this variables argument works with factor levels
   osa_margins <- margins(osa_glm, variables="StopBang_Total")
    unlist(summary(osa_margins)[,c('AME', 'SE')])
 }
@@ -403,7 +390,6 @@ local.imputed$StopBang_Total <- temp
   
   tempf <- formula(paste0( "ever_del ~ " , paste(setdiff(colnames(local.imputed), c('PatientID','predicted_cpap','is_icu', 'ever_assessed',   'linear_propensity', 'predicted_osa', "OSA", 'ever_del', 'WEIGHT', 'CCI', 'before_screening','new_osa', "CPAP_Usage", "pdel", "neval_valid") ), collapse='+') ) )
   osa_glm <- glm( tempf, family=binomial(), data=local.imputed, method=brglmFit)
-## TODO: see how this variables argument works with factor levels
    unlist(summary(osa_glm)$coef["StopBang_Total",1:2])
 }
 

@@ -4,7 +4,8 @@ library('tidyverse')
 library('magrittr')
 library('mice')
 
-num_imputations <- 30
+## one extra round for other calculations
+num_imputations <- 30+1
 
 # skipped_vars <- filtered_cpap %>% select(CPAP_Usage, cpap_compliance)
 
@@ -24,18 +25,13 @@ save_cols <- filtered_cpap[, these.cols] %>% mutate_all(as.integer)
 save_cols[is.na(save_cols)] <- 0L
 filtered_cpap[, these.cols] <- NULL
 
-## imputing the rsi is similary not very useful - tends to be fragile at this step and does not really improve the overall model (bart pulls in the same info)
-filtered_cpap %<>% mutate(rsi_1 = ifelse(is.na(rsi_1), median(rsi_1, na.rm=TRUE), rsi_1) )
-filtered_cpap %<>% mutate(rsi_2 = ifelse(is.na(rsi_2), median(rsi_2, na.rm=TRUE), rsi_2) )
+## after testing, imputing the rsi is not very useful - tends to be fragile at this step and does not really improve the overall model (bart pulls in the same info)
+## runs faster with the same results uncommenting the following lines:
+# filtered_cpap %<>% mutate(rsi_1 = ifelse(is.na(rsi_1), median(rsi_1, na.rm=TRUE), rsi_1) )
+# filtered_cpap %<>% mutate(rsi_2 = ifelse(is.na(rsi_2), median(rsi_2, na.rm=TRUE), rsi_2) )
 
 
 ## now do that only in the analytic population
-## drop case year from imputing stop variables will happen automatically if they are linearly dependent, but slow it down
-
-
-## for imputation of ordered variables like FUNCTION, would prefer to linearize it or binarize it when predicting. Tree methods do this natively. Setting as numeric and using pmm should work ok
-
-
 
 smaller_preop <- filtered_cpap %>% filter(!is.na(ever_del)) %>% filter(Anesthesia_Type == "1") %>% select(-one_of( 'EMPI', 'MRN', 'PAN' , 'DoS', 'neval',  "DoS") )
 

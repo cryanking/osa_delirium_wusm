@@ -25,7 +25,7 @@ ntree_best_pap <- ntree_best
 
 
 
-load(file="imputation_folders/icu_pop/1/imputed_baseline_cov.Rdata")
+load(file="imputation_folders/icu_pop/31/imputed_baseline_cov.Rdata")
 
 
 ## note that because bart is tree-based, ordered factor predictors can be turned back into numerics
@@ -105,11 +105,10 @@ save(file="propensity_osa_varimp.Rdata", var_auc_stopbang)
 
 
 ## model 3: predict treated CPAP given stopBang and OSA dx
-## because CPAP adherence is so close to being binary, and because the distributional assumptions and SE aren't important here, just fit it like a gaussian
 bart_draws   <- 400
 bart_burn    <- 5000
 keep_every   <- 30
-load(file="imputation_folders/icu_pop/1/imputed_baseline_cov.Rdata")
+load(file="imputation_folders/icu_pop/31/imputed_baseline_cov.Rdata")
 
 local.imputed %<>% mutate_at( which(sapply(local.imputed , is.ordered)), as.numeric ) %>% filter(OSA==1 ) %>%filter(!is.na(cpap_compliance)) %>%  mutate( Surg_Type = factor(Surg_Type) ) %>% arrange(!new_osa, PatientID)
 
@@ -119,7 +118,6 @@ cpap_subsample  <- local.imputed %>% select(-one_of("ever_del","PatientID","new_
 outcomes_holder <- local.imputed$ever_del
 
 
-## this model matrix is rank deficent for the sigest calculation
 set.seed(203)
 varible_select_cpap<- sample.int( size=round(0.8*nrow(cpap_subsample)), n=nrow(cpap_subsample))
 cpap_subsample_train <- cpap_subsample[varible_select_cpap,]
@@ -204,4 +202,4 @@ library(emayili)
 smtp <- server(host="smtp.gmail.com", port=465, username=email.u, password=email.p)
 email <- envelope() %>% from("<act.ml.overwatch@gmail.com>") %>% to("<christopherking@wustl.edu>") %>% subject("propensity permutation calc completed") %>% body("nc")
 smtp(email)
-
+}

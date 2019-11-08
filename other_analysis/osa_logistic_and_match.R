@@ -9,7 +9,6 @@ library('margins')
 load(file="osa_data/pre_imputation_preop.Rdata" )
 del_summary_outcomes %<>% filter(!pdel) %>% select(one_of('PatientID', 'ever_del'))
 
-## note that basically everywhere the ICU restriction /not is accomplished in the imputation step, and then the inner_join timing
 
 if(FALSE) {
 ccs_colsums <- irmi_imputed2 %>% select(starts_with('ccs_factor')) %>% select(-one_of("ccs_factor_0")) %>% as.matrix(.) %>% colSums(.) 

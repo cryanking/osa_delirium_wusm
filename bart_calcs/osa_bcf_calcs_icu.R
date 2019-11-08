@@ -160,12 +160,7 @@ bart_sr <- foreach( impute_index = seq(num_imputations), .combine='cbind', .inor
 
   bcf_osa_unadj <- pbart_bcf(x.train=temp.data,   y.train=local.outcomes,  numtreated = num_treated , printevery=50000L, ndpost=bart_draws, nskip=bart_burn, rm.const=FALSE, ntree=ntree_best, ntree_treated=ntree_best/5, k=k_best, ci_frac=ci_frac, nkeeptreedraws=1, keepevery=keep_every)
   ## for this analysis I am only interested in the treatment effect averaged over the sample or treated sample
-#   te_matrix<- pnorm(bcf_osa_unadj$yhat.train[seq(from=1, to=nrow(bcf_osa_unadj$yhat.train ), by=keep_every),]) - pnorm(bcf_osa_unadj$yhat.train.treated[seq(from=1, to=nrow(bcf_osa_unadj$yhat.train.treated ), by=keep_every),])
-# 
-#   ate_vector <- -1*rowMeans(te_matrix)
-#   att_vector <- -1*rowMeans(te_matrix[,seq(num_treated)])
-# 
-#   rbind(ate_vector, att_vector)
+
 rbind(bcf_osa_unadj$ate_vector, bcf_osa_unadj$att_vector)
 
 }
@@ -199,7 +194,6 @@ bart_prop_basic <- foreach( impute_index = seq(num_imputations), .combine='c', .
   local.outcomes <- local.imputed$ever_del
   temp.data <- local.imputed %>% select(-one_of(c('PatientID', 'cpap_compliance', 'linear_propensity',  "Neck", 'is_icu','Age_missing','predicted_cpap', 'ever_del')))  %>% select( -starts_with("StopBang"))  %>% as.data.frame
 
-#   temp.data <- as.data.frame(local.imputed %>% select(-one_of(c('PatientID', 'cpap_compliance', 'linear_propensity',  "OSA", 'is_icu','Age_missing','predicted_cpap','ever_del'))) )
 
   osa_propensity_adjusted<-pbart( y.train = local.outcomes  , x.train = temp.data , nskip = bart_burn, ndpost=bart_draws, keepevery=keep_every   , sparse=FALSE, printevery=50000L, rm.const=FALSE, ntree=ntree_best,  k=k_best, nkeeptrain=1)
 
@@ -266,9 +260,7 @@ print(mean(bart_basic))
 
 sink(NULL)
 
-# bart_draws   <- 30000L
-# bart_burn    <- 5000L
-# keep_every   <- 200L
+
 
 
 bcf_limited <- foreach( impute_index = seq(num_imputations), .combine='cbind', .inorder=FALSE, .packages=c('bartbcf', 'BART', 'magrittr', 'dplyr')) %dopar% {
@@ -287,12 +279,7 @@ bcf_limited <- foreach( impute_index = seq(num_imputations), .combine='cbind', .
 
   bcf_osa_unadj <- pbart_bcf(x.train=temp.data,   y.train=local.outcomes,  numtreated = num_treated , printevery=50000L, ndpost=bart_draws, nskip=bart_burn, rm.const=FALSE, ntree=ntree_best, ntree_treated=ntree_best/5, k=k_best, ci_frac=ci_frac, nkeeptreedraws=1, keepevery=keep_every)
   ## for this analysis I am only interested in the treatment effect averaged over the sample or treated sample
-#   te_matrix<- pnorm(bcf_osa_unadj$yhat.train[seq(from=1, to=nrow(bcf_osa_unadj$yhat.train ), by=keep_every),]) - pnorm(bcf_osa_unadj$yhat.train.treated[seq(from=1, to=nrow(bcf_osa_unadj$yhat.train.treated ), by=keep_every),])
-# 
-#   ate_vector <- -1*rowMeans(te_matrix)
-#   att_vector <- -1*rowMeans(te_matrix[,seq(num_treated)])
-# 
-#   rbind(ate_vector, att_vector)
+
 
 rbind(bcf_osa_unadj$ate_vector, bcf_osa_unadj$att_vector)
 }

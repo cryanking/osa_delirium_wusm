@@ -14,6 +14,8 @@ procedure_codes.xl <- read_excel("osa_data/ProcedureCodes.xlsx", na="NULL", col_
   
   icd10_ccs <- read.csv('osa_data/ccs/ccs_pr_icd10pcs_2018_1.csv', quote="'\"", colClasses="character", row.names=NULL)
 
+  ## the below is all obsolete - new input data no longer in silly numeric format, has ccs matched already
+  
   ## some patients have 9 and 10 codes; use the 9 by default
   non_9 <- procedure_codes.xl %>% group_by(PatientID, SEQUENCE_NUMBER) %>% mutate(n_9=sum(ICD_CODE_VERSION == "9-CM")) %>% filter(n_9==0) %>% ungroup() %>% filter(ICD_CODE_VERSION == "10-PCS") %>% filter(SEQUENCE_NUMBER < 5) %>% select(-one_of("n_9"))
   

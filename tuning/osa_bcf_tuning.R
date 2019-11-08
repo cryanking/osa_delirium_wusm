@@ -16,7 +16,7 @@ options(dplyr.print_max = 100)
 
 ## revisit to make sure pdels are stored and reaccessable or that local.imputed is sorted in the same was as irmi_imputed so that I can use them later
 
-load(file="imputation_folders/icu_pop/1/imputed_baseline_cov.Rdata")
+load(file="imputation_folders/icu_pop/31/imputed_baseline_cov.Rdata")
 
 
 ## a little pre-transformation 
@@ -75,22 +75,8 @@ auc(predictor=temp$prob.test.mean,   response= osa_holder[-varible_select_osa] )
 
 
 }
-# , x.test=  osa_subsample_test
-# cor(temp$prob.test.mean , osa_model$prob.test.mean)
-# auc(predictor=osa_model$prob.train.mean,  response= osa_holder[ varible_select_osa] ) 
-
-# my_qq <- function(x,y){
-# x1 <- x[y==1]
-# x2 <- x[y==0]
-# qqplot(x1,x2)
-# abline(0,1)
-# }
-# png() ;  my_qq(x=osa_model$prob.train.mean, osa_holder[varible_select_osa] ) ; dev.off()
-# png() ;  my_qq(x=osa_model$prob.test.mean, osa_holder[-varible_select_osa] ) ; dev.off()
 
 
-
-## it makes no difference! the range is 0.851 to 0.856!
 
 bart_draws   <- 20000
 bart_burn    <- 5000
@@ -111,7 +97,7 @@ auc(predictor=temp$prob.test.mean,   response= osa_holder[-varible_select_osa] )
 
 which.max(osa_model_auc)
 which.max(osa_model_sparse_auc)
-## note that the sparse variant increases oos auc very slightly - 0.857 vs 0.856 but takes a lot longer, so just do the plain variant
+## note that the sparse variant increases oos auc very slightly but well within the margin of error, but takes a lot longer, so just do the plain variant
 if(FALSE) {
 best_index <- ifelse(max(osa_model_auc) > max(osa_model_sparse_auc), which.max(osa_model_auc), which.max(osa_model_sparse_auc) )
 dosparse <- max(osa_model_auc) < max(osa_model_sparse_auc)
